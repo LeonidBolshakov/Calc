@@ -1,0 +1,1 @@
+C:\PythonSolution\Calc\.venv\Scripts\pyuic6 Calc.ui -o Calc.py
