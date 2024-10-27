@@ -1,10 +1,11 @@
 import csv
 import constant as c
 from formula import F
+from message import ask_for_continuation, show_error_message
 
 from PyQt6 import QtGui, QtWidgets, uic
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMessageBox, QTableWidgetItem
+from PyQt6.QtWidgets import QTableWidgetItem
 
 
 class CalculatorApp(QtWidgets.QMainWindow):
@@ -95,7 +96,8 @@ class CalculatorApp(QtWidgets.QMainWindow):
         """Очистка формулы, поля результата и истории"""
 
         self.clear_formula_result()
-        self.tblResults.setRowCount(0)  # Очищаем историю
+        if ask_for_continuation(c.Const.DIALOG_ASK):
+            self.tblResults.setRowCount(0)  # Очищаем историю
         self.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
 
     def start(self) -> None:
@@ -180,20 +182,20 @@ class CalculatorApp(QtWidgets.QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                c.Const.FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
+                    c.Const.FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
-                writer = csv.writer(file, delimiter=";")
+                writer = csv.writer(file, delimiter=c.Const.DELIMITER)
                 writer.writerow(c.Const.HEAD_CSV_FILE)
                 writer.writerows(results)
         except Exception as e:
-            self.show_error_message(f"{c.Const.TEXT_SYNTAX_ERROR} \n {e}")
+            show_error_message(f"{c.Const.TEXT_SYNTAX_ERROR} \n {e}")
 
     def init_table_results(self):
         """Историю из csv файла переписываем в таблицу результатов"""
 
         try:
             with open(c.Const.FILE_NAME, mode="r", encoding="utf-8-sig") as file:
-                reader = csv.reader(file, delimiter=";")
+                reader = csv.reader(file, delimiter=c.Const.DELIMITER)
                 next(reader)  # Пропускаем шапку документа
 
                 # Построчно записываем данные файла в таблицу истории результатов
@@ -203,17 +205,12 @@ class CalculatorApp(QtWidgets.QMainWindow):
             pass  # отсутствие файла не ошибка — начинаем историю с чистого листа
         except Exception as e:
             # При ошибке чтения файла выдаём сообщение Пользователю
-            self.show_error_message(f"{c.Const.TEXT_ERROR_READ} \n{e}")
+            show_error_message(self, f"{c.Const.TEXT_ERROR_READ} \n{e}")
 
     def setup_info(self):
         """В строки информации проставляем имя файла вывода"""
 
         self.lblInf2.setText(self.lblInf2.text().replace("#", c.Const.FILE_NAME))
-
-    def show_error_message(self, message: str):
-        """Выводим сообщение об ошибке"""
-
-        QMessageBox.critical(self, c.Const.TEXT_TITLE_ERROR, message)
 
     def clear_formula_result(self):
         """Очищаем текстовые поля ввода формулы и вывода результата"""
