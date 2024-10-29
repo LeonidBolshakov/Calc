@@ -1,25 +1,29 @@
 import csv
+import sys
+
 import constant as c
 from formula import F
 from message import ask_for_continuation, show_error_message
 
 from PyQt6 import QtGui, QtWidgets, uic
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QTableWidgetItem
+from PyQt6.QtCore import Qt, QFileInfo, QUrl
+from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow, QWidget, QVBoxLayout
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 
-class CalculatorApp(QtWidgets.QMainWindow):
+class CalculatorApp(QMainWindow):
     """Главный класс приложения калькулятора, наследующий от QMainWindow."""
 
     # Определение кнопок и текстовых полей
-    btnCopy: QtWidgets.QPushButton
     btnClear: QtWidgets.QPushButton
+    btnCopy: QtWidgets.QPushButton
     btnExit: QtWidgets.QPushButton
+    btnHelp: QtWidgets.QPushButton
     btnRun: QtWidgets.QPushButton
     lblInf2: QtWidgets.QLabel
-    tblResults: QtWidgets.QTableWidget
     txtFormula: QtWidgets.QTextEdit
     txtResult: QtWidgets.QTextBrowser
+    tblResults: QtWidgets.QTableWidget
 
     def __init__(self) -> None:
         """Инициализация приложения и загрузка UI."""
@@ -28,9 +32,12 @@ class CalculatorApp(QtWidgets.QMainWindow):
         # Загрузка UI
         uic.loadUi(c.Const.CALC_UI, self)
 
-        self.f = F(self)
+        self.f = F(self)  # Методы работы с формулой
+        self.browser = QWebEngineView()  # браузер для просмотра Help
         self.setup()  # Настройка элементов интерфейса
         self.setup_connections()  # Установка соединений сигналов и слотов
+        # Атрибут необходим для того, что бы окно не было удалено сборщиком мусора.
+        self.help_window = None
 
     def closeEvent(self, event):
         """Переопределение метода выхода из программы"""
@@ -68,11 +75,13 @@ class CalculatorApp(QtWidgets.QMainWindow):
         кроме кнопок копирования."""
 
         # Привязка кнопок к соответствующим методам
-        self.btnRun.clicked.connect(self.f.calculate_formula)
-        self.btnCopy.clicked.connect(self.copy_result_clipboard)
         self.btnClear.clicked.connect(self.clear_all)
+        self.btnCopy.clicked.connect(self.copy_result_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
-        # Переопределение обработки нажатий клавиш
+        self.btnHelp.clicked.connect(self.open_help)
+        self.btnRun.clicked.connect(self.f.calculate_formula)
+
+        # Переопределение обработки нажатий клавиш при вводе формулы
         self.txtFormula.keyPressEvent = self.f.handle_key_press  # type: ignore
 
     @staticmethod
@@ -81,6 +90,11 @@ class CalculatorApp(QtWidgets.QMainWindow):
 
         font.setBold(True)
         return font
+
+    def keyPressEvent(self, event):
+        # Проверяем, была ли нажата клавиша F1
+        if event.key() == Qt.Key.Key_F1:
+            self.open_help()
 
     def copy_result_clipboard(self) -> None:
         """Копирование результата в буфер обмена"""
@@ -182,19 +196,19 @@ class CalculatorApp(QtWidgets.QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                    c.Const.FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
+                c.Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
                 writer = csv.writer(file, delimiter=c.Const.DELIMITER)
                 writer.writerow(c.Const.HEAD_CSV_FILE)
                 writer.writerows(results)
         except Exception as e:
-            show_error_message(f"{c.Const.TEXT_SYNTAX_ERROR} \n {e}")
+            show_error_message(self, f"{c.Const.TEXT_ERROR_WRITE}\n {e}")
 
     def init_table_results(self):
         """Историю из csv файла переписываем в таблицу результатов"""
 
         try:
-            with open(c.Const.FILE_NAME, mode="r", encoding="utf-8-sig") as file:
+            with open(c.Const.FILE_HISTORY, mode="r", encoding="utf-8-sig") as file:
                 reader = csv.reader(file, delimiter=c.Const.DELIMITER)
                 next(reader)  # Пропускаем шапку документа
 
@@ -208,9 +222,9 @@ class CalculatorApp(QtWidgets.QMainWindow):
             show_error_message(self, f"{c.Const.TEXT_ERROR_READ} \n{e}")
 
     def setup_info(self):
-        """В строки информации проставляем имя файла вывода"""
+        """В строку информации проставляем имя файла вывода"""
 
-        self.lblInf2.setText(self.lblInf2.text().replace("#", c.Const.FILE_NAME))
+        self.lblInf2.setText(self.lblInf2.text().replace("#", c.Const.FILE_HISTORY))
 
     def clear_formula_result(self):
         """Очищаем текстовые поля ввода формулы и вывода результата"""
@@ -235,9 +249,53 @@ class CalculatorApp(QtWidgets.QMainWindow):
             for row in range(total)
         ]  # Передача пар (Формула, Результат)
 
+    # noinspection PyUnresolvedReferences
+    def open_help(self):
+        """Вызов Help файла"""
+
+        absolute_path = self.create_window_help()
+        self.show_window_help(absolute_path)
+
+    def on_load_finished(self):
+        """После завершения загрузки файла — показываем окно справки."""
+
+        # Без данного оператора программа не знает об окончании загрузки файла и
+        # окно долго остаётся чёрным.
+        self.help_window.show()
+
+    def create_window_help(self) -> str:
+        """Создаём окно для вывода справки"""
+
+        if not self.help_window:
+            self.help_window = QMainWindow()
+            self.help_window.setWindowTitle(c.Const.TEXT_TITLE_HELP)
+        # Получаем абсолютный путь к файлу справки
+        file_info = QFileInfo(c.Const.FILE_HELP)
+        return file_info.absoluteFilePath()
+
+    # noinspection PyUnresolvedReferences
+    def show_window_help(self, absolute_path: str) -> None:
+        """Показываем окно справки"""
+
+        # Создаём центральный виджет и компоновщик
+        central_widget = QWidget()
+        layout = QVBoxLayout(central_widget)
+        # Добавляем QWebEngineView в компоновщик
+        layout.addWidget(self.browser)
+        # Устанавливаем центральный виджет нового окна
+        self.help_window.setCentralWidget(central_widget)
+        # Подключаем сигнал loadFinished к слоту
+        self.browser.loadFinished.connect(self.on_load_finished)
+        # Показываем новое окно
+        self.help_window.resize(*c.Const.SIZE_WINDOW_HELP)
+        self.help_window.show()
+
+        # Настраиваем QWebEngineView
+        self.browser.setUrl(QUrl.fromLocalFile(absolute_path))
+
 
 # Запуск приложения
 if __name__ == "__main__":
-    app = QtWidgets.QApplication([])  # Создание экземпляра приложения
+    app = QtWidgets.QApplication(sys.argv)  # Создание экземпляра приложения
     calc_app = CalculatorApp()  # Создание экземпляра калькулятора
     calc_app.start()  # Запуск калькулятора

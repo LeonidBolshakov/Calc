@@ -68,15 +68,15 @@ class F:
     def handle_key_press(self, event: QtGui.QKeyEvent) -> None:
         """Обработка нажатий клавиш, включая Enter, Esc"""
 
-        keys = (self.check_enter(event), self.check_esc(event))
+        keys = (self.check_calculation(event), self.check_esc(event))
         if all(keys):
-            # Если нажатая клавиша не специальная, передаем событие дальше
+            # Если нажатая не специальная клавиша, передаем событие дальше
             QtWidgets.QTextEdit.keyPressEvent(self.calculator.txtFormula, event)
 
-    def check_enter(self, event: QtGui.QKeyEvent) -> bool:
+    def check_calculation(self, event: QtGui.QKeyEvent) -> bool:
         """Обработка нажатия клавиши Enter (вычисления формулы)."""
 
-        keys = (Qt.Key.Key_Return, Qt.Key.Key_Enter)
+        keys = (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Equal)
 
         # Проверяем нажата ли клавиша "Ввод" и, если нажата, производим расчёт
         if event.key() in keys:
