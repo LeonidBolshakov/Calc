@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class Const:
     CALC_UI = "calc.ui"  # Имя файла UI для калькулятора
     DELIMITER = ";"
-    DIALOG_AGREE = "&Согласен"
+    DIALOG_ACCEPT = "&Согласен"
     DIALOG_REJECTION = "&Отказываюсь"
     DIALOG_TITLE = "Удаление"
     DIALOG_ASK = (
@@ -15,7 +15,7 @@ class Const:
     )
     DIRECTION_LEFT = "left"
     DIRECTION_RIGHT = "right"
-    FILE_HELP = "help.mht"
+    FILE_HELP = "Help к Калькулятору.mht"
     FILE_HISTORY = "results.csv"  # Имя файла с историей формул и результатов
     HEAD_CSV_FILE = ("Выражение", "Результат")
     # Словарь для замены нестандартных символов на стандартные
@@ -23,6 +23,7 @@ class Const:
         ",": ".",
         " ": "",
         "'": "",
+        "’": "",
         "_": "",
         ":": "/",
         "\t": "",

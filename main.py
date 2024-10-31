@@ -6,9 +6,9 @@ from formula import F
 from message import ask_for_continuation, show_error_message
 
 from PyQt6 import QtGui, QtWidgets, uic
-from PyQt6.QtCore import Qt, QFileInfo, QUrl
-from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow, QWidget, QVBoxLayout
-from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtCore import Qt, QUrl, QMimeData
+from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow, QTextEdit
 
 
 class CalculatorApp(QMainWindow):
@@ -32,12 +32,16 @@ class CalculatorApp(QMainWindow):
         # Загрузка UI
         uic.loadUi(c.Const.CALC_UI, self)
 
+        # Определяем для поля ввода формулы пользовательский класс.
+        # Цель — персональная обработка текста, вставляемого из буфера обмена.
+        # self.centralwidget = QtWidgets.QWidget(parent=self.txtFormula_)
+        # self.centralwidget.setObjectName("centralwidget")
+        # self.txtFormula = CustomTextEdit(parent=self.centralwidget)
+        # self.copy_properties(self.txtFormula_, self.txtFormula)
+
         self.f = F(self)  # Методы работы с формулой
-        self.browser = QWebEngineView()  # браузер для просмотра Help
         self.setup()  # Настройка элементов интерфейса
         self.setup_connections()  # Установка соединений сигналов и слотов
-        # Атрибут необходим для того, что бы окно не было удалено сборщиком мусора.
-        self.help_window = None
 
     def closeEvent(self, event):
         """Переопределение метода выхода из программы"""
@@ -66,15 +70,15 @@ class CalculatorApp(QMainWindow):
 
     def setup_bold(self):
         """Установка жирного начертания для шрифтов элементов управления."""
-        for widget in (self.btnRun, self.btnExit, self.txtFormula, self.txtResult):
+        widgets = (self.btnRun, self.btnExit, self.txtFormula, self.txtResult)
+        for widget in widgets:
             widget.setFont(self.bold_font(widget.font()))  # Установка жирного шрифта
 
     # noinspection PyUnresolvedReferences
     def setup_connections(self) -> None:
-        """Привязка сигналов к методам обработки событий,
-        кроме кнопок копирования."""
+        """Привязка сигналов к методам обработки событий"""
 
-        # Привязка кнопок к соответствующим методам
+        # Привязка кнопок, заранее определённых на форме, к методам
         self.btnClear.clicked.connect(self.clear_all)
         self.btnCopy.clicked.connect(self.copy_result_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
@@ -92,7 +96,7 @@ class CalculatorApp(QMainWindow):
         return font
 
     def keyPressEvent(self, event):
-        # Проверяем, была ли нажата клавиша F1
+        # Проверяем, была ли нажата клавиша F1 в любом месте главного окна.
         if event.key() == Qt.Key.Key_F1:
             self.open_help()
 
@@ -152,7 +156,7 @@ class CalculatorApp(QMainWindow):
 
     def add_item_in_row(self, row: int, column: int, text: str, align: str = "left"):
         """Добавляем элемент в таблицу,
-        делаем недоступным для редактирования и выравниваем"""
+        делаем его недоступным для редактирования и выравниваем."""
 
         item = QTableWidgetItem(text)  # Создание нового элемента таблицы
 
@@ -196,7 +200,7 @@ class CalculatorApp(QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                c.Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
+                    c.Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
                 writer = csv.writer(file, delimiter=c.Const.DELIMITER)
                 writer.writerow(c.Const.HEAD_CSV_FILE)
@@ -249,49 +253,24 @@ class CalculatorApp(QMainWindow):
             for row in range(total)
         ]  # Передача пар (Формула, Результат)
 
-    # noinspection PyUnresolvedReferences
-    def open_help(self):
+    @staticmethod
+    def open_help():
         """Вызов Help файла"""
 
-        absolute_path = self.create_window_help()
-        self.show_window_help(absolute_path)
+        help_file_path = c.Const.FILE_HELP
+        QDesktopServices.openUrl(QUrl.fromLocalFile(help_file_path))
 
-    def on_load_finished(self):
-        """После завершения загрузки файла — показываем окно справки."""
-
-        # Без данного оператора программа не знает об окончании загрузки файла и
-        # окно долго остаётся чёрным.
-        self.help_window.show()
-
-    def create_window_help(self) -> str:
-        """Создаём окно для вывода справки"""
-
-        if not self.help_window:
-            self.help_window = QMainWindow()
-            self.help_window.setWindowTitle(c.Const.TEXT_TITLE_HELP)
-        # Получаем абсолютный путь к файлу справки
-        file_info = QFileInfo(c.Const.FILE_HELP)
-        return file_info.absoluteFilePath()
-
-    # noinspection PyUnresolvedReferences
-    def show_window_help(self, absolute_path: str) -> None:
-        """Показываем окно справки"""
-
-        # Создаём центральный виджет и компоновщик
-        central_widget = QWidget()
-        layout = QVBoxLayout(central_widget)
-        # Добавляем QWebEngineView в компоновщик
-        layout.addWidget(self.browser)
-        # Устанавливаем центральный виджет нового окна
-        self.help_window.setCentralWidget(central_widget)
-        # Подключаем сигнал loadFinished к слоту
-        self.browser.loadFinished.connect(self.on_load_finished)
-        # Показываем новое окно
-        self.help_window.resize(*c.Const.SIZE_WINDOW_HELP)
-        self.help_window.show()
-
-        # Настраиваем QWebEngineView
-        self.browser.setUrl(QUrl.fromLocalFile(absolute_path))
+    @staticmethod
+    def copy_properties(source, target):
+        # Получаем список всех свойств объекта source
+        for prop in range(source.metaObject().propertyCount()):
+            property_name = source.metaObject().property(prop).name()
+            # Получаем значение свойства
+            value = source.property(property_name)
+            print(property_name, value)
+            # Устанавливаем это значение в целевой объект
+            if property_name not in ("objectName", "focus"):
+                target.setProperty(property_name, value)
 
 
 # Запуск приложения

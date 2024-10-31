@@ -14,26 +14,28 @@ class NullIO(io.StringIO):
 
 
 class F:
-    def __init__(self, calculator):
-        self.calculator = calculator
+    def __init__(self, calculator_app):
+        self.calculator_app = calculator_app
 
     def calculate_formula(self) -> None:
         """Получение формулы из текстового поля и вычисление результата"""
 
-        formula = self.calculator.txtFormula.toPlainText()  # Получение текста формулы
-        self.formula_processing(formula)  # Обработка формулы
-        self.calculator.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
+        formula = (
+            self.calculator_app.txtFormula.toPlainText()
+        )  # Получение текста формулы
+        self.out_formula_result(formula)  # Вывод формулы и результата её выполнения
+        self.calculator_app.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
 
-    def formula_processing(self, formula: str) -> None:
+    def out_formula_result(self, formula: str) -> None:
         """Обработка формулы: стандартизация, проверка и вычисление."""
 
         formula_st = self.symbol_standardization(formula)  # Стандартизация формулы
         if self.antivirus(formula_st):  # Проверка на допустимые символы
-            self.calculator.out_result(
+            self.calculator_app.out_result(
                 formula, self.calculation(formula_st)
             )  # Вывод результата
         else:
-            self.calculator.out_result(formula, c.Const.TEXT_ERROR_SYMBOL)
+            self.calculator_app.out_result(formula, c.Const.TEXT_ERROR_SYMBOL)
 
     @staticmethod
     def symbol_standardization(formula: str) -> str:
@@ -42,19 +44,19 @@ class F:
         # Создание таблицы перевода
         translation_table = str.maketrans(c.Const.REPLACE_SYMBOLS)
 
-        return formula.translate(translation_table)  # Применение замены к формуле
+        return formula.translate(translation_table)  # Замена символов в формуле
 
     # noinspection PyBroadException
     @staticmethod
     def calculation(formula: str) -> str:
-        """Вычисление результата формулы с обработкой ошибок."""
+        """Вычисление результата формулы и обработка ошибок."""
         try:
             with redirect_stderr(NullIO()):  # Подавление вывода ошибок на консоль
-                return str(eval(formula))  # Вычисление по формуле
+                return str(eval(formula))  # Результат вычисления
         except ZeroDivisionError:
-            return c.Const.TEXT_DEVISE_0  # Обработка деления на ноль
+            return c.Const.TEXT_DEVISE_0  # Сообщение о делении на 0
         except Exception:
-            return c.Const.TEXT_SYNTAX_ERROR  # Обработка всех других ошибок
+            return c.Const.TEXT_SYNTAX_ERROR  # Сообщение о синтаксической ошибке
 
     @staticmethod
     def antivirus(formula: str) -> bool:
@@ -68,26 +70,26 @@ class F:
     def handle_key_press(self, event: QtGui.QKeyEvent) -> None:
         """Обработка нажатий клавиш, включая Enter, Esc"""
 
-        keys = (self.check_calculation(event), self.check_esc(event))
-        if all(keys):
+        keys = (self.check_press_calc(event), self.check_press_esc(event))
+        if not any(keys):
             # Если нажатая не специальная клавиша, передаем событие дальше
-            QtWidgets.QTextEdit.keyPressEvent(self.calculator.txtFormula, event)
+            QtWidgets.QTextEdit.keyPressEvent(self.calculator_app.txtFormula, event)
 
-    def check_calculation(self, event: QtGui.QKeyEvent) -> bool:
-        """Обработка нажатия клавиши Enter (вычисления формулы)."""
+    def check_press_calc(self, event: QtGui.QKeyEvent) -> bool:
+        """Обработка нажатия клавишей вычисления формулы (Enter)."""
 
         keys = (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Equal)
 
         # Проверяем нажата ли клавиша "Ввод" и, если нажата, производим расчёт
         if event.key() in keys:
-            self.calculate_formula()  # Вычисление формулы при нажатии Enter
-            return False
-        return True
+            self.calculate_formula()  # Вычисление формулы при нажатии клавиши "Ввод"
+            return True
+        return False
 
-    def check_esc(self, event: QtGui.QKeyEvent) -> bool:
+    def check_press_esc(self, event: QtGui.QKeyEvent) -> bool:
         """Обработка нажатия клавиши Esc для удаления символов из формулы."""
 
         if event.key() == Qt.Key.Key_Escape:
-            self.calculator.clear_formula_result()
-            return False
-        return True
+            self.calculator_app.clear_formula_result()
+            return True
+        return False

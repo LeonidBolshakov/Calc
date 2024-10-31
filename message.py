@@ -17,16 +17,16 @@ class CustomDialog(QDialog):
         label = QLabel(warning, self)
         layout.addWidget(label)
 
-        ok_button = QPushButton(c.Const.DIALOG_AGREE, self)
-        cancel_button = QPushButton(c.Const.DIALOG_REJECTION, self)
-        layout.addWidget(ok_button)
-        layout.addWidget(cancel_button)
+        accept_button = QPushButton(c.Const.DIALOG_ACCEPT, self)
+        rejection_button = QPushButton(c.Const.DIALOG_REJECTION, self)
+        layout.addWidget(accept_button)
+        layout.addWidget(rejection_button)
 
         # noinspection PyUnresolvedReferences
-        ok_button.clicked.connect(self.accept)
+        accept_button.clicked.connect(self.accept)
         # noinspection PyUnresolvedReferences
-        cancel_button.clicked.connect(self.reject)
-        cancel_button.setFocus()
+        rejection_button.clicked.connect(self.reject)
+        rejection_button.setFocus()  # По умолчанию - "Отказ"
 
 
 def ask_for_continuation(warning: str) -> int:
