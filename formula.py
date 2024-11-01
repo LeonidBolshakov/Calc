@@ -1,4 +1,4 @@
-import constant as c
+from constant import Const
 from contextlib import redirect_stderr
 import io
 
@@ -17,32 +17,31 @@ class F:
     def __init__(self, calculator_app):
         self.calculator_app = calculator_app
 
-    def calculate_formula(self) -> None:
-        """Получение формулы из текстового поля и вычисление результата"""
+    def formula_processing(self) -> None:
+        """Получение формулы из текстового поля и её обработка"""
 
         formula = (
             self.calculator_app.txtFormula.toPlainText()
         )  # Получение текста формулы
-        self.out_formula_result(formula)  # Вывод формулы и результата её выполнения
-        self.calculator_app.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
+        formula_standard = self.symbol_standardization(
+            formula
+        )  # Стандартизация формулы
 
-    def out_formula_result(self, formula: str) -> None:
-        """Обработка формулы: стандартизация, проверка и вычисление."""
-
-        formula_st = self.symbol_standardization(formula)  # Стандартизация формулы
-        if self.antivirus(formula_st):  # Проверка на допустимые символы
+        if self.antivirus(formula_standard):  # Проверка на допустимые символы
             self.calculator_app.out_result(
-                formula, self.calculation(formula_st)
+                formula, self.calculation(formula_standard)  # вычисление
             )  # Вывод результата
         else:
-            self.calculator_app.out_result(formula, c.Const.TEXT_ERROR_SYMBOL)
+            self.calculator_app.out_result(formula, Const.TEXT_ERROR_SYMBOL)
+
+        self.calculator_app.txtFormula.setFocus()  # Установка фокуса на поле ввода
 
     @staticmethod
     def symbol_standardization(formula: str) -> str:
         """Заменяем нестандартные символы стандартными"""
 
         # Создание таблицы перевода
-        translation_table = str.maketrans(c.Const.REPLACE_SYMBOLS)
+        translation_table = str.maketrans(Const.REPLACE_SYMBOLS)
 
         return formula.translate(translation_table)  # Замена символов в формуле
 
@@ -54,9 +53,9 @@ class F:
             with redirect_stderr(NullIO()):  # Подавление вывода ошибок на консоль
                 return str(eval(formula))  # Результат вычисления
         except ZeroDivisionError:
-            return c.Const.TEXT_DEVISE_0  # Сообщение о делении на 0
+            return Const.TEXT_DEVISE_0  # Сообщение о делении на 0
         except Exception:
-            return c.Const.TEXT_SYNTAX_ERROR  # Сообщение о синтаксической ошибке
+            return Const.TEXT_SYNTAX_ERROR  # Сообщение о синтаксической ошибке
 
     @staticmethod
     def antivirus(formula: str) -> bool:
@@ -64,7 +63,7 @@ class F:
         Защищает программу от ввода вредоносного кода."""
 
         return all(
-            char in c.Const.SAFE_SYMBOLS for char in formula
+            char in Const.SAFE_SYMBOLS for char in formula
         )  # Возвращает True, если все символы допустимы
 
     def handle_key_press(self, event: QtGui.QKeyEvent) -> None:
@@ -82,7 +81,7 @@ class F:
 
         # Проверяем нажата ли клавиша "Ввод" и, если нажата, производим расчёт
         if event.key() in keys:
-            self.calculate_formula()  # Вычисление формулы при нажатии клавиши "Ввод"
+            self.formula_processing()  # Вычисление формулы при нажатии клавиши "Ввод"
             return True
         return False
 

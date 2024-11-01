@@ -553,6 +553,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>14</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -1388,7 +1389,7 @@
      </palette>
     </property>
     <property name="text">
-     <string>Здесь вводите формулу для вычислений. Используйте числа, скобки и знаки арифметики</string>
+     <string>Здесь надо вводить формулу для вычислений. Используйте числа, скобки и знаки арифметики</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnExit">
@@ -1448,7 +1449,7 @@
      <string>В&amp;ыйти</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="txtFormula">
+   <widget class="CustomTextEdit" name="txtFormula">
     <property name="geometry">
      <rect>
       <x>160</x>
@@ -1496,6 +1497,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>14</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -1514,6 +1516,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>classes</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

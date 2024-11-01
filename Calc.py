@@ -196,6 +196,7 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.ColorGroup.Disabled, QtGui.QPalette.ColorRole.ToolTipText, brush)
         self.txtResult.setPalette(palette)
         font = QtGui.QFont()
+        font.setPointSize(14)
         font.setBold(True)
         font.setWeight(75)
         self.txtResult.setFont(font)
@@ -487,7 +488,7 @@ class Ui_MainWindow(object):
         font.setWeight(75)
         self.btnExit.setFont(font)
         self.btnExit.setObjectName("btnExit")
-        self.txtFormula = QtWidgets.QTextEdit(parent=self.centralwidget)
+        self.txtFormula = CustomTextEdit(parent=self.centralwidget)
         self.txtFormula.setGeometry(QtCore.QRect(160, 30, 621, 64))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 127))
@@ -501,6 +502,7 @@ class Ui_MainWindow(object):
         palette.setBrush(QtGui.QPalette.ColorGroup.Disabled, QtGui.QPalette.ColorRole.Text, brush)
         self.txtFormula.setPalette(palette)
         font = QtGui.QFont()
+        font.setPointSize(14)
         font.setBold(True)
         font.setWeight(75)
         self.txtFormula.setFont(font)
@@ -528,5 +530,6 @@ class Ui_MainWindow(object):
         self.btnHelp.setText(_translate("MainWindow", "&Справка"))
         self.lblInf2.setText(_translate("MainWindow", "История выражений и результатов, по окончании работы програмы,\n"
 "будет записана в файл #"))
-        self.label.setText(_translate("MainWindow", "Здесь вводите формулу для вычислений. Используйте числа, скобки и знаки арифметики"))
+        self.label.setText(_translate("MainWindow", "Здесь надо вводить формулу для вычислений. Используйте числа, скобки и знаки арифметики"))
         self.btnExit.setText(_translate("MainWindow", "В&ыйти"))
+from classes import CustomTextEdit
