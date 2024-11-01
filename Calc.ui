@@ -611,7 +611,8 @@
      </font>
     </property>
     <property name="text">
-     <string>&amp;Копировать</string>
+     <string>&amp;Копировать
+Результат</string>
     </property>
    </widget>
    <widget class="QTableWidget" name="tblResults">
@@ -1334,6 +1335,11 @@
       </disabled>
      </palette>
     </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
     <property name="styleSheet">
      <string notr="true">color: rgb(0, 0, 255)</string>
     </property>
@@ -1387,6 +1393,11 @@
        </colorrole>
       </disabled>
      </palette>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Здесь надо вводить формулу для вычислений. Используйте числа, скобки и знаки арифметики</string>

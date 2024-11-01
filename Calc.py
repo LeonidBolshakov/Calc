@@ -453,6 +453,9 @@ class Ui_MainWindow(object):
         brush.setStyle(QtCore.Qt.BrushStyle.SolidPattern)
         palette.setBrush(QtGui.QPalette.ColorGroup.Disabled, QtGui.QPalette.ColorRole.ButtonText, brush)
         self.lblInf2.setPalette(palette)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.lblInf2.setFont(font)
         self.lblInf2.setStyleSheet("color: rgb(0, 0, 255)")
         self.lblInf2.setObjectName("lblInf2")
         self.label = QtWidgets.QLabel(parent=self.centralwidget)
@@ -468,6 +471,9 @@ class Ui_MainWindow(object):
         brush.setStyle(QtCore.Qt.BrushStyle.SolidPattern)
         palette.setBrush(QtGui.QPalette.ColorGroup.Disabled, QtGui.QPalette.ColorRole.WindowText, brush)
         self.label.setPalette(palette)
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.label.setFont(font)
         self.label.setObjectName("label")
         self.btnExit = QtWidgets.QPushButton(parent=self.centralwidget)
         self.btnExit.setGeometry(QtCore.QRect(20, 350, 111, 51))
@@ -523,7 +529,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Калькулятор"))
         self.btnRun.setText(_translate("MainWindow", "&Вычислить"))
-        self.btnCopy.setText(_translate("MainWindow", "&Копировать"))
+        self.btnCopy.setText(_translate("MainWindow", "&Копировать\n"
+"Результат"))
         self.lblInf1.setText(_translate("MainWindow", "Нажатие кнопкс \"С\", слева от строчки истории вычислений, копирует формулу в буфер обмена"))
         self.btnClear.setText(_translate("MainWindow", "&Очистить\n"
 "всё"))

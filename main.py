@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow
 
 from classes import CustomTextEdit
 from constant import Const
-from formula import F
+from formulas import F
 from message import ask_for_continuation, show_error_message
 
 
@@ -33,8 +33,6 @@ class CalculatorApp(QMainWindow):
         # Загрузка UI
         uic.loadUi(Const.CALC_UI, self)
 
-        # Определяем для поля ввода формулы пользовательский класс.
-
         self.f = F(self)  # Методы работы с формулой
         self.setup()  # Настройка элементов интерфейса
         self.setup_connections()  # Установка соединений сигналов и слотов
@@ -42,13 +40,15 @@ class CalculatorApp(QMainWindow):
     def closeEvent(self, event):
         """Переопределение метода выхода из программы"""
 
+        # self.write_history()  # записываем таблицу истории вычислений в файл
         self.write_history()  # записываем таблицу истории вычислений в файл
+
         event.accept()
 
     def keyPressEvent(self, event):
         """Переопределение обработки нажатия клавиши"""
 
-        # Проверяем, была ли нажата клавиша F1 в любом месте главного окна.
+        # При нажатии клавиши F1 вызов справки.
         if event.key() == Qt.Key.Key_F1:
             self.open_help()  # открываем файл со справкой
 
@@ -116,13 +116,14 @@ class CalculatorApp(QMainWindow):
         self.clear_formula_result()
         if ask_for_continuation(Const.DIALOG_ASK):
             self.tblResults.clear()  # Очищаем историю
+            self.tblResults.setRowCount(0)  # Удаляем строки
         self.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
 
-    def start(self) -> None:
+    def start(self) -> int:
         """Запуск приложения и отображение главного окна."""
 
         self.show()  # Показ формы
-        QtWidgets.QApplication.exec()  # Запуск основного цикла приложения
+        return QtWidgets.QApplication.exec()  # Запуск основного цикла приложения
 
     def out_result(self, formula: str, result: str) -> None:
         """Вывод результата вычисления в текстовое поле и таблицу истории."""
@@ -133,14 +134,13 @@ class CalculatorApp(QMainWindow):
     def out_in_tbl_results(self, formula: str, result: str):
         """Добавление новой строки с формулой и результатом в таблицу истории."""
 
-        new_row = self.tblResults.rowCount()  # Получение текущего количества строк
+        new_row = 0  # Новую строку вставляем в начало таблицы
         self.tblResults.insertRow(new_row)  # Вставка новой строки
 
         self.add_button_in_row(new_row)  # Добавляем кнопку в новую строку
         self.add_item_in_row(new_row, 1, formula)  # Добавляем формулу в новую строку
         # Добавляем результат в новую строку и выравниваем по правому краю.
         self.add_item_in_row(new_row, 2, result, "right")
-        self.tblResults.scrollToBottom()  # Прокручиваем таблицу к последней строке
 
     def copy_history_clipboard(self, row: int) -> None:
         """Копирование формулы из таблицы результатов в буфер обмена."""
@@ -200,7 +200,7 @@ class CalculatorApp(QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                    Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
+                Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
                 writer = csv.writer(file, delimiter=Const.DELIMITER)
                 writer.writerow(Const.HEAD_CSV_FILE)
@@ -265,4 +265,4 @@ class CalculatorApp(QMainWindow):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)  # Создание экземпляра приложения
     calc_app = CalculatorApp()  # Создание экземпляра калькулятора
-    calc_app.start()  # Запуск калькулятора
+    sys.exit(calc_app.start())  # Запуск калькулятора

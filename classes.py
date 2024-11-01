@@ -2,7 +2,7 @@ from PyQt6.QtCore import QMimeData
 from PyQt6.QtWidgets import QTextEdit
 
 from constant import Const
-from formula import F
+from formulas import F
 
 
 class CustomTextEdit(QTextEdit):
