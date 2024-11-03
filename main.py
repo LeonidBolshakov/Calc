@@ -1,15 +1,23 @@
+""" Приложение Калькулятор — позволяет проводить вычисления по формуле.
+    В формуле можно использовать числа, скобки и арифметические действия.
+     Ведётся и записывается на диск журнал расчётов.
+     Журнал можно просматривать как текст и в программе MS EXCEL.
+     Формулы можно копировать в буфер обмена.
+     При вводе из буфера обмена вся
+     ненужная информация в формулу не записывается."""
+
 import csv
 import sys
 
-from PyQt6 import QtGui, QtWidgets, uic
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtCore import Qt, QUrl
+from PyQt6 import QtWidgets, uic
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow
 
 from classes import CustomTextEdit
-from constant import Const
+from constants import Const
 from formulas import F
 from message import ask_for_continuation, show_error_message
+from fuctions import bold_font, open_help
 
 
 class CalculatorApp(QMainWindow):
@@ -50,7 +58,7 @@ class CalculatorApp(QMainWindow):
 
         # При нажатии клавиши F1 вызов справки.
         if event.key() == Qt.Key.Key_F1:
-            self.open_help()  # открываем файл со справкой
+            open_help()  # открываем файл со справкой
 
     def setup(self) -> None:
         """Настройка начальных параметров интерфейса."""
@@ -77,7 +85,7 @@ class CalculatorApp(QMainWindow):
         """Установка жирного начертания для шрифтов элементов управления."""
         widgets = (self.btnRun, self.btnExit, self.txtFormula, self.txtResult)
         for widget in widgets:
-            widget.setFont(self.bold_font(widget.font()))  # Установка жирного шрифта
+            widget.setFont(bold_font(widget.font()))  # Установка жирного шрифта
 
     # noinspection PyUnresolvedReferences
     def setup_connections(self) -> None:
@@ -87,18 +95,11 @@ class CalculatorApp(QMainWindow):
         self.btnClear.clicked.connect(self.clear_all)
         self.btnCopy.clicked.connect(self.copy_result_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
-        self.btnHelp.clicked.connect(self.open_help)
+        self.btnHelp.clicked.connect(open_help)
         self.btnRun.clicked.connect(self.f.formula_processing)
 
         # Переопределение обработки нажатий клавиш при вводе формулы
         self.txtFormula.keyPressEvent = self.f.handle_key_press  # type: ignore
-
-    @staticmethod
-    def bold_font(font: QtGui.QFont) -> QtGui.QFont:
-        """Возвращает шрифт с установленным жирным начертанием."""
-
-        font.setBold(True)
-        return font
 
     def copy_result_clipboard(self) -> None:
         """Копирование результата вычислений в буфер обмена"""
@@ -252,13 +253,6 @@ class CalculatorApp(QMainWindow):
             (self.tblResults.item(row, 1).text(), self.tblResults.item(row, 2).text())
             for row in range(total)
         ]  # Передаём пары (Формула, Результат)
-
-    @staticmethod
-    def open_help():
-        """Вызов Help файла"""
-
-        help_file_path = Const.FILE_HELP
-        QDesktopServices.openUrl(QUrl.fromLocalFile(help_file_path))
 
 
 # Запуск приложения

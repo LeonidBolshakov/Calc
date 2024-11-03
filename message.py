@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QLabel,
 )
-import constant as c
+import constants as c
 
 
 class CustomDialog(QDialog):

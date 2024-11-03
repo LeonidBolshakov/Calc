@@ -27,13 +27,32 @@ class Const:
         "_": "",
         ":": "/",
         "\t": "",
+        "\n": "",
         "^": "**",
         "x": "*",
         "х": "*",
+        "–": "-",  # Широкий дефис меняется на знак "-"
     }
-    # Набор допустимых символов для формул
-    SAFE_SYMBOLS = "0123456789.+-*/()%"
+    # Набор допустимых символов и формул
+    SAFE_FORMULAS = {
+        "sqrt",
+        "degrees",
+        "radians",
+        "cos",
+        "sin",
+        "tan",
+        "acos",
+        "asin",
+        "atan",
+        "log",
+        "log10",
+        "abs",
+        "pi",
+        "e",
+    }
+    SAFE_SYMBOLS = "0123456789.+-*/()"
     SIZE_WINDOW_HELP = (800, 600)
+    SPECIAL_TEMPLATE_CHARACTERS = r".^$*+?{}[]\|()"
     TEXT_BUTTON_COPY = "C"
     TEXT_DEVISE_0 = "Ошибка. Деление на 0"
     TEXT_ERROR_READ = (

@@ -8,7 +8,7 @@ from constants import Const
 
 from main import (
     CalculatorApp,
-)
+)  # Предполагается, что ваш класс находится в файле calculator_app.py
 
 
 class TestCalculatorApp(unittest.TestCase):
@@ -52,7 +52,6 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_write_history(self):
         """Проверка записи истории в CSV файл."""
-        self.remove_file(Const.FILE_HISTORY)
         self.calc_app.out_result("2 + 2", "4")
         self.calc_app.write_history()
         # Проверка, что файл был создан и содержит данные
@@ -64,8 +63,6 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_read_from_tblResults(self):
         """Проверка чтения данных из таблицы результатов."""
-
-        self.calc_app.clear_formula_result()
         self.calc_app.out_result("2 + 2", "4")
         results = self.calc_app.read_from_tblResults()
         self.assertEqual(results, [("2 + 2", "4")])
@@ -75,14 +72,6 @@ class TestCalculatorApp(unittest.TestCase):
         """Очистка после завершения тестов."""
         cls.calc_app.close()
         cls.app.quit()
-
-    @staticmethod
-    def remove_file(file_name):
-        """Удаление файла"""
-        try:
-            os.remove(file_name)
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":
