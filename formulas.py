@@ -21,11 +21,13 @@ class F:
         formula_standard = symbol_standardization(formula)  # Стандартизация формулы
         # Проверка на допустимые символы
         if no_virus(formula_standard):
-            self.calculator_app.out_result(
+            self.calculator_app.output_calculation_result(
                 formula, calculation(formula_standard)  # вычисление
             )  # Вывод результата
         else:
-            self.calculator_app.out_result(formula, Const.TEXT_ERROR_SYMBOL)
+            self.calculator_app.output_calculation_result(
+                formula, Const.TEXT_ERROR_SYMBOL
+            )
 
         self.calculator_app.txtFormula.setFocus()  # Установка фокуса на поле ввода
 

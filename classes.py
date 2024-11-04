@@ -1,7 +1,6 @@
 from PyQt6.QtCore import QMimeData
 from PyQt6.QtWidgets import QTextEdit
 
-from formulas import F
 from fuctions import only_safe_symbols
 
 
@@ -10,7 +9,6 @@ class CustomTextEdit(QTextEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.f = F(self)  # Методы работы с формулой
 
     def insertFromMimeData(self, source: QMimeData):
         """Подмена метода вставки данных из буфера обмена"""

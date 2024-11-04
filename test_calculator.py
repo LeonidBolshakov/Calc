@@ -37,7 +37,7 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_out_result(self):
         """Проверка вывода результата в текстовое поле и таблицу."""
-        self.calc_app.out_result("2 + 2", "4")
+        self.calc_app.output_calculation_result("2 + 2", "4")
         self.assertEqual(self.calc_app.txtResult.toPlainText(), "4")
         self.assertEqual(self.calc_app.tblResults.rowCount(), 1)
         self.assertEqual(self.calc_app.tblResults.item(0, 1).text(), "2 + 2")
@@ -52,7 +52,7 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_write_history(self):
         """Проверка записи истории в CSV файл."""
-        self.calc_app.out_result("2 + 2", "4")
+        self.calc_app.output_calculation_result("2 + 2", "4")
         self.calc_app.write_history()
         # Проверка, что файл был создан и содержит данные
         with open(Const.FILE_HISTORY, "r", encoding="utf-8-sig") as file:
@@ -63,7 +63,7 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_read_from_tblResults(self):
         """Проверка чтения данных из таблицы результатов."""
-        self.calc_app.out_result("2 + 2", "4")
+        self.calc_app.output_calculation_result("2 + 2", "4")
         results = self.calc_app.read_from_tblResults()
         self.assertEqual(results, [("2 + 2", "4")])
 
