@@ -3,38 +3,31 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Const:
-    CALC_UI = "calc.ui"  # Имя файла UI для калькулятора
-    DELIMITER = ";"
-    DIALOG_ACCEPT = "&Согласен"
-    DIALOG_REJECTION = "&Отказываюсь"
-    DIALOG_TITLE = "Удаление"
+    ALIGN_LEFT = "left"  # Выравнивание — налево
+    ALIGN_RIGHT = "right"  # Выравнивание направо
+    BUTTON_COLUMN_WIDTH = 50  # Ширина колонки с кнопкой
+    BUTTON_TEXT_COPY_LINE = "C"  # Текст кнопки "Копирование строки"
+    CALCULATOR_UI_FILE_NAME = "calc.ui"  # Имя файла UI для калькулятора
+    CSV_HEADERS = ("Выражение", "Результат")  # Заголовки столбцов CSV файла
+    DEFAULT_DECIMAL_PLACES = 2  # Число знаков для округления по умолчанию
+    DIALOG_ACCEPT = "&Согласен"  # Текст кнопки в диалоговом окне — Принять
+    DIALOG_REJECTION = "&Отказываюсь"  # Текст кнопки в диалоговом окне — Отказаться
+    DIALOG_TITLE = "Удаление"  # Заголовок диалогового окна
     DIALOG_ASK = (
         "Сейчас навсегда будет удалена\n"
         "вся ранее накопленная история вычислений.\n"
         "Вы с этим согласны?"
-    )
-    DIRECTION_LEFT = "left"
-    DIRECTION_RIGHT = "right"
-    FILE_HELP = "Help к Калькулятору.mht"
-    FILE_HISTORY = "results.csv"  # Имя файла с историей формул и результатов
-    HEAD_CSV_FILE = ("Выражение", "Результат")
-    # Словарь для замены нестандартных символов на стандартные
-    REPLACE_SYMBOLS = {
-        ",": ".",
-        " ": "",
-        "'": "",
-        "’": "",
-        "_": "",
-        ":": "/",
-        "\t": "",
-        "\n": "",
-        "^": "**",
-        "x": "*",
-        "х": "*",
-        "–": "-",  # Широкий дефис меняется на знак "-"
-    }
-    # Набор допустимых символов и формул
-    SAFE_FORMULAS = {
+    )  # Вопрос в диалоговом окне
+    ERROR_DIVIDE_BY_ZERO = "Ошибка. Деление на 0"  # Текст ошибки "Деление на 0"
+    # текст ошибки при вводе недопустимого символа
+    ERROR_INVALID_SYMBOL = "Ошибка. Недопустимый символ"
+    ERROR_SYNTAX = "Ошибка синтаксиса"
+    ERROR_MESSAGE_TITLE = "Ошибка"  # Заголовок окна с сообщением об ошибке
+    FAILED_TO_WRITE_HISTORY_TEXT = "Не удалось записать историю вычислений в файл\n:"
+    FORMULA_COLUMN_WIDTH = 275  # Ширина колонки Формула
+
+    EXCEL_LIST_SEPARATOR = ";"  # Разделитель элементов списка для MS EXCEL
+    FORMULA_VALIDATION_LIST = {
         "sqrt",
         "degrees",
         "radians",
@@ -50,20 +43,31 @@ class Const:
         "pi",
         "e",
     }
-    SAFE_SYMBOLS = "0123456789.+-*/()"
-    SIZE_WINDOW_HELP = (800, 600)
-    SPECIAL_TEMPLATE_CHARACTERS = r".^$*+?{}[]\|()"
-    TEXT_BUTTON_COPY = "C"
-    TEXT_DEVISE_0 = "Ошибка. Деление на 0"
-    TEXT_ERROR_READ = (
+    HELP_FILE_NAME = "Help к Калькулятору.mht"  # Имя файла с Help
+    HELP_WINDOW_SIZE = (800, 600)  # Размеры окна помощи
+    HISTORY_FILE_NAME = "results.csv"  # Имя файла с историей формул и результатов
+    HISTORY_READ_ERROR = (
         "Файл с историй вычислений существует, но испорчен или недоступен. \n"
         "Прежняя история вычислений не используется:"
-    )
-    TEXT_ERROR_SYMBOL = "Ошибка. Недопустимый символ"
-    TEXT_ERROR_WRITE = "Не удалось записать историю вычислений в файл\n:"
-    TEXT_SYNTAX_ERROR = "Ошибка синтаксиса"
-    TEXT_TITLE_ERROR = "Ошибка"
-    TEXT_TITLE_HELP = "Справка"
-    WIDTH_COLUMN_BUTTON = 50
-    WIDTH_COLUMN_FORMULA = 275
-    WIDTH_COLUMN_RESULT = 275
+    )  # Текст при ошибке чтения файла истории
+    # Словарь для замены нестандартных символов на стандартные
+    REPLACEMENT_DICTIONARY = {
+        ",": ".",
+        " ": "",
+        "'": "",
+        "’": "",
+        "_": "",
+        ":": "/",
+        "\t": "",
+        "\n": "",
+        "^": "**",
+        "x": "*",
+        "х": "*",
+        "–": "-",  # Широкий дефис меняется на знак "-"
+    }
+    RESULT_COLUMN_WIDTH = 275  # Ширина колонки Результат
+    DECIMAL_PLACE_RANGE = (0, 9)  # Диапазон числа знаков для округления
+    # Специальные символы шаблона регулярных выражений
+    SPECIAL_REGEX_SYMBOLS = r".^$*+?{}[]\|()"
+    # Набор допустимых формул
+    VALID_CHAR_SET = "0123456789.+-*/()"  # Набор допустимых символов

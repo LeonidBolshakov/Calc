@@ -28,8 +28,10 @@ class CalculatorApp(QMainWindow):
     btnCopy: QtWidgets.QPushButton
     btnExit: QtWidgets.QPushButton
     btnHelp: QtWidgets.QPushButton
+    btnRound: QtWidgets.QPushButton
     btnRun: QtWidgets.QPushButton
     lblInf2: QtWidgets.QLabel
+    lineRoundDigit: QtWidgets.QLineEdit
     txtFormula: CustomTextEdit
     txtResult: QtWidgets.QTextBrowser
     tblResults: QtWidgets.QTableWidget
@@ -39,7 +41,7 @@ class CalculatorApp(QMainWindow):
         super().__init__()
 
         # Загрузка UI
-        uic.loadUi(Const.CALC_UI, self)
+        uic.loadUi(Const.CALCULATOR_UI_FILE_NAME, self)
 
         self.f = F(self)  # Методы работы с формулой
         self.setup()  # Настройка элементов интерфейса
@@ -49,9 +51,10 @@ class CalculatorApp(QMainWindow):
         """Настройка начальных параметров интерфейса."""
 
         self.txtFormula.setFocus()  # Установка фокуса на поле ввода формулы
-        self.setup_table_results()  # Настройка таблицы результатов
-        self.init_table_results()  # Инициализация таблицы результатов
-        self.setup_info()  # Настройка информационной части окна
+        self.f.set_decimal_places_input()  # Настройка поля ввода числа знаков округления
+        self.customize_results_table()  # Настройка таблицы результатов
+        self.import_history_from_csv()  # Инициализация таблицы результатов
+        self.set_output_filename_label()  # Установка имени файла в метку формы
         self.setup_bold()  # Установка жирного шрифта для некоторых элементов
 
     # noinspection PyUnresolvedReferences
@@ -59,19 +62,20 @@ class CalculatorApp(QMainWindow):
         """Привязка сигналов к слотам"""
 
         # Привязка статичных кнопок к слотам
-        self.btnClear.clicked.connect(self.clear_all)
-        self.btnCopy.clicked.connect(self.copy_result_clipboard)
+        self.btnClear.clicked.connect(self.clear_all_fields)
+        self.btnCopy.clicked.connect(self.copy_result_to_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
         self.btnHelp.clicked.connect(open_help)
+        self.btnRound.clicked.connect(self.f.round_result)
         self.btnRun.clicked.connect(self.f.formula_processing)
 
         # Переопределение обработки нажатий клавиш при вводе формулы
         self.txtFormula.keyPressEvent = self.f.handle_key_press  # type: ignore
 
-    def setup_table_results(self):
+    def customize_results_table(self):
         """Настройка внешнего вида таблицы результатов"""
 
-        self.setup_tbl_columns()  # Настройка колонок таблицы результатов
+        self.customize_results_columns()  # Настройка колонок таблицы результатов
 
         self.tblResults.horizontalHeader().setVisible(
             False
@@ -80,27 +84,26 @@ class CalculatorApp(QMainWindow):
             False
         )  # Скрыть вертикальный заголовок
 
-    def init_table_results(self):
+    def import_history_from_csv(self):
         """Историю из csv файла переписываем в таблицу результатов"""
 
         try:
-            with open(Const.FILE_HISTORY, mode="r", encoding="utf-8-sig") as file:
-                reader = csv.reader(file, delimiter=Const.DELIMITER)
-                next(reader)  # Пропускаем шапку документа
-
+            with open(Const.HISTORY_FILE_NAME, mode="r", encoding="utf-8-sig") as file:
+                reader = csv.reader(file, delimiter=Const.EXCEL_LIST_SEPARATOR)
+                next(reader)  # Пропускаем шапку файла
                 # Построчно записываем данные файла в таблицу истории результатов
-                for rec in reader:
-                    self.out_row_results(formula=rec[0], result=rec[1])
+                for row_data in reader:
+                    self.move_row_in_results(formula=row_data[0], result=row_data[1])
         except FileNotFoundError:
             pass  # отсутствие файла не ошибка — начинаем историю с чистого листа
         except Exception as e:
-            # При чтении файла ошибке — выдаём сообщение Пользователю
-            show_error_message(self, f"{Const.TEXT_ERROR_READ} \n{e}")
+            # При ошибке чтении файла — выдаём сообщение Пользователю
+            show_error_message(self, f"{Const.HISTORY_READ_ERROR} \n{e}")
 
-    def setup_info(self):
+    def set_output_filename_label(self):
         """В строку информации проставляем имя файла вывода"""
 
-        self.lblInf2.setText(self.lblInf2.text().replace("#", Const.FILE_HISTORY))
+        self.lblInf2.setText(self.lblInf2.text().replace("#", Const.HISTORY_FILE_NAME))
 
     def setup_bold(self):
         """Установка жирного начертания для шрифтов элементов управления."""
@@ -108,15 +111,15 @@ class CalculatorApp(QMainWindow):
         for widget in widgets:
             widget.setFont(bold_font(widget.font()))  # Установка жирного шрифта
 
-    def clear_all(self):
+    def clear_all_fields(self):
         """Очистка формулы, поля результата и истории"""
 
-        self.clear_formula_result()
+        self.clear_formula_and_result()
         if ask_for_continuation(Const.DIALOG_ASK):
             self.clear_table_results()
         self.txtFormula.setFocus()  # Установка фокуса обратно на поле ввода
 
-    def copy_result_clipboard(self) -> None:
+    def copy_result_to_clipboard(self) -> None:
         """Копирование результата вычислений в буфер обмена"""
 
         text = self.txtResult.toPlainText()  # Получение текста результата вычислений
@@ -126,95 +129,103 @@ class CalculatorApp(QMainWindow):
         clipboard.setText(text)  # Запись текста в буфер обмена
         self.txtFormula.setFocus()  # Установка фокуса на поле ввода
 
-    def setup_tbl_columns(self):
+    def customize_results_columns(self):
         """Настраиваем ширину колонок таблицы результатов"""
 
         self.tblResults.setColumnCount(3)  # Установка количества колонок
-        self.tblResults.setColumnWidth(0, Const.WIDTH_COLUMN_BUTTON)
-        self.tblResults.setColumnWidth(1, Const.WIDTH_COLUMN_FORMULA)
-        self.tblResults.setColumnWidth(2, Const.WIDTH_COLUMN_RESULT)
+        self.tblResults.setColumnWidth(0, Const.BUTTON_COLUMN_WIDTH)
+        self.tblResults.setColumnWidth(1, Const.FORMULA_COLUMN_WIDTH)
+        self.tblResults.setColumnWidth(2, Const.RESULT_COLUMN_WIDTH)
 
-    def clear_formula_result(self):
+    def clear_formula_and_result(self):
         """Очищаем текстовые поля ввода формулы и вывода результата"""
 
         self.txtFormula.clear()  # Очищаем поле формулы
         self.txtResult.clear()  # Очищаем поле результата
 
-    def output_calculation_result(self, formula: str, result: str) -> None:
+    def output_result_to_text_field_and_history(
+        self, formula: str, result: str
+    ) -> None:
         """Вывод результата вычисления в текстовое поле и таблицу истории."""
 
-        self.out_in_result(result)  # Вывод результата в текстовое поле
-        self.out_new_row_results(
+        self.output_result_to_result_field(result)  # Вывод результата в текстовое поле
+        self.insert_new_row_in_results(
             formula, result
         )  # Вывод формулы и результата в таблицу
 
-    def out_in_result(self, result: str) -> None:
+    def output_result_to_result_field(self, result: str) -> None:
         """Вывод результата вычисления в поле 'Результат'"""
 
         self.txtResult.setPlainText(result)
 
-    def out_new_row_results(self, formula: str, result: str):
+    def insert_new_row_in_results(self, formula: str, result: str):
         """В таблицу результатов добавляем новую строку.
         Строку записываем в начало таблицы."""
 
-        table_row = self.read_from_tblResults()  # Считываем таблицу истории
+        table_row = self.get_history_table_data()  # Считываем таблицу истории
         self.clear_table_results()
 
-        self.out_row_results(formula, result)
+        self.move_row_in_results(formula, result)
         for row in table_row:
-            self.out_row_results(row[0], row[1])
+            self.move_row_in_results(row[0], row[1])
 
     def clear_table_results(self):
         """Очищаем таблицу истории"""
 
         self.tblResults.setRowCount(0)  # Удаляем строки
 
-    def out_row_results(self, formula: str, result: str):
+    def move_row_in_results(self, formula: str, result: str):
         """Добавление новой строки с формулой и результатом в таблицу истории."""
 
         # Новую строку вставляем в конец таблицы
         new_row = self.tblResults.rowCount()
         self.tblResults.insertRow(new_row)  # Вставка новой строки
 
-        self.add_button_in_row(new_row)  # Добавляем кнопку в новую строку
-        self.add_item_in_row(new_row, 1, formula)  # Добавляем формулу в новую строку
+        self.create_copy_button_in_row(new_row)  # Добавляем кнопку в новую строку
+        self.add_and_lock_element_to_table(
+            new_row, 1, formula
+        )  # Добавляем формулу в новую строку
         # Добавляем результат в новую строку и выравниваем по правому краю.
-        self.add_item_in_row(new_row, 2, result, "right")
+        self.add_and_lock_element_to_table(new_row, 2, result, Const.ALIGN_RIGHT)
 
     # noinspection PyUnresolvedReferences
-    def add_button_in_row(self, row: int) -> None:
+    def create_copy_button_in_row(self, row: int) -> None:
         """Создание кнопки в строке таблицы. Кнопка нужна для копирования формулы."""
 
         # Создание кнопки с текстом "C"
-        button = QtWidgets.QPushButton(Const.TEXT_BUTTON_COPY)
+        button = QtWidgets.QPushButton(Const.BUTTON_TEXT_COPY_LINE)
 
         # Привязка метода к событию нажатия кнопки
-        button.clicked.connect(lambda checked, r=row: self.copy_history_clipboard(r))
+        button.clicked.connect(
+            lambda checked, r=row: self.copy_history_formula_to_clipboard(r)
+        )
 
         # Добавление кнопки в соответствующую строку таблицы
         self.tblResults.setCellWidget(row, 0, button)
 
-    def add_item_in_row(self, row: int, column: int, text: str, align: str = "left"):
+    def add_and_lock_element_to_table(
+        self, row: int, column: int, text: str, align: str = Const.ALIGN_LEFT
+    ):
         """Добавляем элемент в таблицу,
         делаем его недоступным для редактирования и выравниваем."""
 
-        item = QTableWidgetItem(text)  # Создание нового элемента таблицы
+        element = QTableWidgetItem(text)  # Создание нового элемента таблицы
 
         # Запрет редактирования
-        item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        element.setFlags(element.flags() & ~Qt.ItemFlag.ItemIsEditable)
 
         # Установка выравнивания текста
         qt_align = (
             Qt.AlignmentFlag.AlignRight
-            if align == Const.DIRECTION_RIGHT
+            if align == Const.ALIGN_RIGHT
             else Qt.AlignmentFlag.AlignLeft
         )  # Установка выравнивания в зависимости от параметра
-        item.setTextAlignment(qt_align)  # Применение выравнивания к элементу
+        element.setTextAlignment(qt_align)  # Применение выравнивания к элементу
 
         # Добавление элемента в таблицу
-        self.tblResults.setItem(row, column, item)
+        self.tblResults.setItem(row, column, element)
 
-    def copy_history_clipboard(self, row: int) -> None:
+    def copy_history_formula_to_clipboard(self, row: int) -> None:
         """Копирование формулы из таблицы результатов в буфер обмена."""
 
         text = self.tblResults.item(  # type: ignore
@@ -226,42 +237,42 @@ class CalculatorApp(QMainWindow):
         clipboard.setText(text)  # type: ignore # Установка текста в буфер обмена
         self.txtFormula.setFocus()
 
-    def closeEvent(self, event):
-        """Переопределение метода выхода из программы"""
-
-        self.write_history()  # записываем таблицу истории вычислений в файл
-        event.accept()
-
-    def write_history(self):
-        """Записывает историю вычислений и результатов в csv файл"""
-
-        results = self.read_from_tblResults()
-
-        # Запись данных в CSV файл
-        try:
-            with open(
-                Const.FILE_HISTORY, mode="w", newline="", encoding="utf-8-sig"
-            ) as file:
-                writer = csv.writer(file, delimiter=Const.DELIMITER)
-                writer.writerow(Const.HEAD_CSV_FILE)
-                writer.writerows(results)
-        except Exception as e:
-            show_error_message(self, f"{Const.TEXT_ERROR_WRITE}\n {e}")
-
-    def read_from_tblResults(self) -> list[tuple]:
-        """Чтение данных из таблицы результатов"""
-        total = self.tblResults.rowCount()  # Количество строк в таблице результатов
-        return [
-            (self.tblResults.item(row, 1).text(), self.tblResults.item(row, 2).text())
-            for row in range(total)
-        ]  # Передаём пары [Формула, Результат]
-
     def keyPressEvent(self, event):
         """Переопределение обработки нажатия клавиши"""
 
         # При нажатии клавиши F1 вызов справки.
         if event.key() == Qt.Key.Key_F1:
             open_help()  # открываем файл со справкой
+
+    def closeEvent(self, event):
+        """Переопределение метода выхода из программы"""
+
+        self.write_history_to_csv_file()  # записываем таблицу истории вычислений в файл
+        event.accept()
+
+    def write_history_to_csv_file(self):
+        """Записывает историю вычислений и результатов в csv файл"""
+
+        history_table_row = self.get_history_table_data()
+
+        # Запись данных в CSV файл
+        try:
+            with open(
+                Const.HISTORY_FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
+            ) as file:
+                writer = csv.writer(file, delimiter=Const.EXCEL_LIST_SEPARATOR)
+                writer.writerow(Const.CSV_HEADERS)
+                writer.writerows(history_table_row)
+        except Exception as e:
+            show_error_message(self, f"{Const.FAILED_TO_WRITE_HISTORY_TEXT}\n {e}")
+
+    def get_history_table_data(self) -> list[tuple]:
+        """Чтение данных из таблицы истории"""
+        total = self.tblResults.rowCount()  # Количество строк в таблице истории
+        return [
+            (self.tblResults.item(row, 1).text(), self.tblResults.item(row, 2).text())
+            for row in range(total)
+        ]  # Передаём пары [Формула, Результат]
 
     def start(self) -> int:
         """Запуск приложения и отображение главного окна."""

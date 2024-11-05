@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QMimeData
 from PyQt6.QtWidgets import QTextEdit
 
-from fuctions import only_safe_symbols
+from fuctions import filter_out_unsafe_symbols
 
 
 class CustomTextEdit(QTextEdit):
@@ -15,5 +15,5 @@ class CustomTextEdit(QTextEdit):
 
         # Из текста убираем все лишние символы и передаём управление дальше
         if source.hasText():
-            source = only_safe_symbols(source)
+            source = filter_out_unsafe_symbols(source)
         super().insertFromMimeData(source)

@@ -43,4 +43,4 @@ def ask_for_continuation(warning: str) -> int:
 def show_error_message(parent, message: str):
     """Выводим сообщение об ошибке"""
 
-    QMessageBox.critical(parent, c.Const.TEXT_TITLE_ERROR, message)
+    QMessageBox.critical(parent, c.Const.ERROR_MESSAGE_TITLE, message)

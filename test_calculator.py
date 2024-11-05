@@ -30,14 +30,14 @@ class TestCalculatorApp(unittest.TestCase):
         """Проверка функции очистки всех полей."""
         self.calc_app.txtFormula.setPlainText("2 + 2")
         self.calc_app.txtResult.setPlainText("4")
-        self.calc_app.clear_all()
+        self.calc_app.clear_all_fields()
         self.assertEqual(self.calc_app.txtFormula.toPlainText(), "")
         self.assertEqual(self.calc_app.txtResult.toPlainText(), "")
         self.assertEqual(self.calc_app.tblResults.rowCount(), 0)
 
     def test_out_result(self):
         """Проверка вывода результата в текстовое поле и таблицу."""
-        self.calc_app.output_calculation_result("2 + 2", "4")
+        self.calc_app.output_result_to_text_field_and_history("2 + 2", "4")
         self.assertEqual(self.calc_app.txtResult.toPlainText(), "4")
         self.assertEqual(self.calc_app.tblResults.rowCount(), 1)
         self.assertEqual(self.calc_app.tblResults.item(0, 1).text(), "2 + 2")
@@ -46,16 +46,16 @@ class TestCalculatorApp(unittest.TestCase):
     def test_copy_result_clipboard(self):
         """Проверка копирования результата в буфер обмена."""
         self.calc_app.txtResult.setPlainText("4")
-        self.calc_app.copy_result_clipboard()
+        self.calc_app.copy_result_to_clipboard()
         clipboard = QApplication.clipboard()
         self.assertEqual(clipboard.text(), "4")
 
     def test_write_history(self):
         """Проверка записи истории в CSV файл."""
-        self.calc_app.output_calculation_result("2 + 2", "4")
-        self.calc_app.write_history()
+        self.calc_app.output_result_to_text_field_and_history("2 + 2", "4")
+        self.calc_app.write_history_to_csv_file()
         # Проверка, что файл был создан и содержит данные
-        with open(Const.FILE_HISTORY, "r", encoding="utf-8-sig") as file:
+        with open(Const.HISTORY_FILE_NAME, "r", encoding="utf-8-sig") as file:
             lines = file.readlines()
             self.assertGreater(
                 len(lines), 1
@@ -63,8 +63,8 @@ class TestCalculatorApp(unittest.TestCase):
 
     def test_read_from_tblResults(self):
         """Проверка чтения данных из таблицы результатов."""
-        self.calc_app.output_calculation_result("2 + 2", "4")
-        results = self.calc_app.read_from_tblResults()
+        self.calc_app.output_result_to_text_field_and_history("2 + 2", "4")
+        results = self.calc_app.get_history_table_data()
         self.assertEqual(results, [("2 + 2", "4")])
 
     @classmethod
