@@ -8,7 +8,7 @@ from PyQt6.QtCore import QUrl
 from PyQt6 import QtGui
 from PyQt6.QtCore import QMimeData
 
-from constants import Const
+from _internal.constants import Const
 
 
 class NullIO(io.StringIO):

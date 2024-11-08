@@ -7,8 +7,9 @@ class Const:
     ALIGN_RIGHT = "right"  # Выравнивание направо
     BUTTON_COLUMN_WIDTH = 50  # Ширина колонки с кнопкой
     BUTTON_TEXT_COPY_LINE = "C"  # Текст кнопки "Копирование строки"
-    CALCULATOR_UI_FILE_NAME = "calc.ui"  # Имя файла UI для калькулятора
+    CALCULATOR_UI_FILE_NAME = "_internal/Calc.ui"  # Имя файла UI для калькулятора
     CSV_HEADERS = ("Выражение", "Результат")  # Заголовки столбцов CSV файла
+    DECIMAL_PLACE_RANGE = (0, 9)  # Диапазон числа знаков для округления
     DEFAULT_DECIMAL_PLACES = 2  # Число знаков для округления по умолчанию
     DIALOG_ACCEPT = "&Согласен"  # Текст кнопки в диалоговом окне — Принять
     DIALOG_REJECTION = "&Отказываюсь"  # Текст кнопки в диалоговом окне — Отказаться
@@ -43,9 +44,9 @@ class Const:
         "pi",
         "e",
     }
-    HELP_FILE_NAME = "Help к Калькулятору.mht"  # Имя файла с Help
+    HELP_FILE_NAME = "Help.mht"  # Имя файла с Help
     HELP_WINDOW_SIZE = (800, 600)  # Размеры окна помощи
-    HISTORY_FILE_NAME = "results.csv"  # Имя файла с историей формул и результатов
+    HISTORY_FILE_NAME = "../results.csv"  # Имя файла с историей формул и результатов
     HISTORY_READ_ERROR = (
         "Файл с историй вычислений существует, но испорчен или недоступен. \n"
         "Прежняя история вычислений не используется:"
@@ -66,7 +67,6 @@ class Const:
         "–": "-",  # Широкий дефис меняется на знак "-"
     }
     RESULT_COLUMN_WIDTH = 275  # Ширина колонки Результат
-    DECIMAL_PLACE_RANGE = (0, 9)  # Диапазон числа знаков для округления
     # Специальные символы шаблона регулярных выражений
     SPECIAL_REGEX_SYMBOLS = r".^$*+?{}[]\|()"
     # Набор допустимых формул

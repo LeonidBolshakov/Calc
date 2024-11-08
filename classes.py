@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QMimeData
 from PyQt6.QtWidgets import QTextEdit
 
-from fuctions import filter_out_unsafe_symbols
+from _internal.functions import filter_out_unsafe_symbols
 
 
 class CustomTextEdit(QTextEdit):
