@@ -1,14 +1,14 @@
 from contextlib import redirect_stderr
 import io
-import re
 import math
+import re
 
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtCore import QUrl
 from PyQt6 import QtGui
 from PyQt6.QtCore import QMimeData
 
-from _internal.constants import Const
+from constants import Const
 
 
 class NullIO(io.StringIO):
@@ -16,6 +16,10 @@ class NullIO(io.StringIO):
 
     def write(self, *args, **kwargs):
         pass
+
+
+def not_used():  # Фиктивная функция — позволяет не удалять import math
+    math.sqrt(0)
 
 
 def bold_font(font: QtGui.QFont) -> QtGui.QFont:
@@ -68,14 +72,14 @@ def no_virus(formula: str) -> re.Match | None:
 def create_formula_validation_pattern() -> str:
     """Формирует шаблон контроля формулы регулярными выражениями"""
 
-    # шаблон надо формировать только 1 раз еа цикл выполнения программы
+    # шаблон надо формировать только 1 раз на цикл выполнения программы
     if hasattr(create_formula_validation_pattern, "result"):
         return create_formula_validation_pattern.result
     else:
         pattern_s = "|".join(add_escape_to_special_symbols(Const.VALID_CHAR_SET))
         pattern_f = "|".join(Const.FORMULA_VALIDATION_LIST)
         create_formula_validation_pattern.result = (
-            "(" + pattern_s + "|" + pattern_f + ")"
+                "(" + pattern_s + "|" + pattern_f + ")"
         )
         return create_formula_validation_pattern.result
 
@@ -121,10 +125,11 @@ def filter_out_unsafe_symbols(source: QMimeData) -> QMimeData:
 def add_math_prefix_to_function_calls(formula):
     """Заменяет в формуле вызовы функций. К имени функции добавляется текст 'math.'"""
 
+    # Регулярное выражение для поиска всех имён разрешённых функций
     if hasattr(add_math_prefix_to_function_calls, "pattern"):
         pattern = add_math_prefix_to_function_calls.pattern
     else:
-        # Создаёт регулярное выражение для поиска всех имён функций.
+        # Создаёт регулярное выражение для поиска всех имён разрешённых функций.
         pattern = re.compile(
             "|".join(re.escape(key) for key in Const.FORMULA_VALIDATION_LIST)
         )

@@ -3,8 +3,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QApplication
 
-from _internal.constants import Const
-from _internal.functions import (
+from constants import Const
+from functions import (
     no_virus,
     calculate_and_validate_formula,
     normalize_characters,

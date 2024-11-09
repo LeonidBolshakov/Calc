@@ -1,10 +1,10 @@
-""" Приложение Калькулятор — позволяет проводить вычисления по формуле.
-    В формуле можно использовать числа, скобки и арифметические действия.
-     Ведётся и записывается на диск журнал расчётов.
-     Журнал можно просматривать как текст и в программе MS EXCEL.
+""" Приложение Калькулятор — позволяет вводить формулу и производить по ней вычисления.
+     В формуле можно использовать числа, скобки и арифметические действия.
      Формулы можно копировать в буфер обмена.
      При вводе из буфера обмена вся
-     ненужная информация в формулу не записывается."""
+     ненужная информация в формулу не записывается.
+     Программа ведёт и записывает на диск историю расчётов.
+     Историю можно просматривать в программе MS EXCEL и как текст."""
 
 import csv
 import sys
@@ -17,7 +17,7 @@ from classes import CustomTextEdit
 from constants import Const
 from formulas import F
 from message import ask_for_continuation, show_error_message
-from fuctions import bold_font, open_help
+from functions import bold_font, open_help
 
 
 class CalculatorApp(QMainWindow):
@@ -268,10 +268,12 @@ class CalculatorApp(QMainWindow):
 
     def get_history_table_data(self) -> list[tuple]:
         """Чтение данных из таблицы истории"""
-        total = self.tblResults.rowCount()  # Количество строк в таблице истории
+        total_row_history = (
+            self.tblResults.rowCount()
+        )  # Количество строк в таблице истории
         return [
             (self.tblResults.item(row, 1).text(), self.tblResults.item(row, 2).text())
-            for row in range(total)
+            for row in range(total_row_history)
         ]  # Передаём пары [Формула, Результат]
 
     def start(self) -> int:
