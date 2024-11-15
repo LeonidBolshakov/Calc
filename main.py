@@ -12,8 +12,9 @@ import sys
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow
+from pathlib import Path
 
-from classes import CustomTextEdit
+from customtextedit import CustomTextEdit
 from constants import Const
 from formulas import F
 from message import ask_for_continuation, show_error_message
@@ -23,7 +24,7 @@ from functions import bold_font, open_help
 class CalculatorApp(QMainWindow):
     """Главный класс приложения калькулятора, наследующий от QMainWindow."""
 
-    # Определение кнопок и текстовых полей
+    # Определение кнопок и текстовых полей формы
     btnClear: QtWidgets.QPushButton
     btnCopy: QtWidgets.QPushButton
     btnExit: QtWidgets.QPushButton
@@ -36,21 +37,39 @@ class CalculatorApp(QMainWindow):
     txtResult: QtWidgets.QTextBrowser
     tblResults: QtWidgets.QTableWidget
 
+    # Определение метода класса
+    f: F
+
     def __init__(self) -> None:
         """Инициализация приложения и загрузка UI."""
         super().__init__()
 
-        # Загрузка UI
-        uic.loadUi(Const.CALCULATOR_UI_FILE_NAME, self)
-
-        self.f = F(self)  # Методы работы с формулой
-        self.setup()  # Настройка элементов интерфейса
+        self.init_vars()  # Инициализация атрибутов класса
+        self.setup_interface()  # Настройка элементов интерфейса
         self.setup_connections()  # Установка соединений сигналов и слотов
 
-    def setup(self) -> None:
+    def init_vars(self):
+        """Присвоение значений переменным"""
+
+        self.f = F(self)  # Методы работы с формулой
+
+        # Загрузка UI и переменных в форму объект класса
+        exe_directory = (  # Директория, из которой был запущен файл
+            Path(sys.argv[0]).parent
+            if hasattr(sys, "frozen")  # exe файл, получен с помощью PyInstaller
+            else Path(__file__).parent  # Если файл запущен как обычный Python-скрипт
+        )
+
+        ui_config_abs_path = exe_directory / Const.UI_CONFIG_REL_PATH
+        uic.loadUi(ui_config_abs_path, self)
+
+    def setup_interface(self) -> None:
         """Настройка начальных параметров интерфейса."""
 
         self.txtFormula.setFocus()  # Установка фокуса на поле ввода формулы
+        # установка текста подсказки в поля вводу формулы и вывода результата
+        self.txtFormula.setPlaceholderText(Const.PLACEHOLDER_FORMULA)
+        self.txtResult.setPlaceholderText(Const.PLACEHOLDER_RESULT)
         self.f.set_decimal_places_input()  # Настройка поля ввода числа знаков округления
         self.customize_results_table()  # Настройка таблицы результатов
         self.import_history_from_csv()  # Инициализация таблицы результатов
@@ -133,9 +152,12 @@ class CalculatorApp(QMainWindow):
         """Настраиваем ширину колонок таблицы результатов"""
 
         self.tblResults.setColumnCount(3)  # Установка количества колонок
-        self.tblResults.setColumnWidth(0, Const.BUTTON_COLUMN_WIDTH)
-        self.tblResults.setColumnWidth(1, Const.FORMULA_COLUMN_WIDTH)
-        self.tblResults.setColumnWidth(2, Const.RESULT_COLUMN_WIDTH)
+        self.tblResults.setColumnWidth(0, Const.COLUMN_WIDTH_BUTTON)
+        table_widget_width = self.tblResults.width()
+        table_width = table_widget_width - self.tblResults.verticalScrollBar().width()
+        column_width = int((table_width - Const.COLUMN_WIDTH_BUTTON) / 2)
+        self.tblResults.setColumnWidth(1, column_width)
+        self.tblResults.setColumnWidth(2, column_width)
 
     def clear_formula_and_result(self):
         """Очищаем текстовые поля ввода формулы и вывода результата"""
@@ -144,7 +166,7 @@ class CalculatorApp(QMainWindow):
         self.txtResult.clear()  # Очищаем поле результата
 
     def output_result_to_text_field_and_history(
-        self, formula: str, result: str
+            self, formula: str, result: str
     ) -> None:
         """Вывод результата вычисления в текстовое поле и таблицу истории."""
 
@@ -204,7 +226,7 @@ class CalculatorApp(QMainWindow):
         self.tblResults.setCellWidget(row, 0, button)
 
     def add_and_lock_element_to_table(
-        self, row: int, column: int, text: str, align: str = Const.ALIGN_LEFT
+            self, row: int, column: int, text: str, align: str = Const.ALIGN_LEFT
     ):
         """Добавляем элемент в таблицу,
         делаем его недоступным для редактирования и выравниваем."""
@@ -237,6 +259,15 @@ class CalculatorApp(QMainWindow):
         clipboard.setText(text)  # type: ignore # Установка текста в буфер обмена
         self.txtFormula.setFocus()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.customize_results_columns()
+
+    def resizeEvent(self, event):
+        """Переопределение изменения размера окна"""
+        super().resizeEvent(event)
+        self.customize_results_columns()
+
     def keyPressEvent(self, event):
         """Переопределение обработки нажатия клавиши"""
 
@@ -258,7 +289,7 @@ class CalculatorApp(QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                Const.HISTORY_FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
+                    Const.HISTORY_FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
                 writer = csv.writer(file, delimiter=Const.EXCEL_LIST_SEPARATOR)
                 writer.writerow(Const.CSV_HEADERS)

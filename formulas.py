@@ -1,6 +1,6 @@
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIntValidator
+from PyQt6.QtGui import QColor, QIntValidator
 from PyQt6.QtWidgets import QApplication
 
 from constants import Const
@@ -17,6 +17,7 @@ class F:
 
     def formula_processing(self) -> None:
         """Получение формулы из текстового поля и её обработка"""
+
         formula = (
             self.calculator_app.txtFormula.toPlainText()
         )  # Получение текста формулы
@@ -41,7 +42,7 @@ class F:
             self.clear_on_escape_key(event),
         )
         if not any(keys):
-            # Если нажатая не специальная клавиша, передаем событие дальше
+            # Если нажатая не специальная клавиша, передаем событие дальше.
             QtWidgets.QTextEdit.keyPressEvent(self.calculator_app.txtFormula, event)
 
     def handle_calculation_key_press(self, event: QtGui.QKeyEvent) -> bool:

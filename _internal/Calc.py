@@ -652,7 +652,7 @@ class Ui_MainWindow(object):
         self.label_3.setGeometry(QtCore.QRect(140, 320, 51, 20))
         self.label_3.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label_3.setObjectName("label_3")
-        self.txtFormula = QtWidgets.QTextEdit(parent=self.centralwidget)
+        self.txtFormula = CustomTextEdit(parent=self.centralwidget)
         self.txtFormula.setGeometry(QtCore.QRect(200, 30, 621, 64))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(0, 0, 127))
@@ -671,7 +671,7 @@ class Ui_MainWindow(object):
         self.txtFormula.setObjectName("txtFormula")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 884, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 884, 25))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
@@ -699,3 +699,4 @@ class Ui_MainWindow(object):
 "Результат"))
         self.label_2.setText(_translate("MainWindow", "до"))
         self.label_3.setText(_translate("MainWindow", "знаков"))
+from customtextedit import CustomTextEdit

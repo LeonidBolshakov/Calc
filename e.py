@@ -1,64 +1,60 @@
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 import sys
-import unittest
-from unittest.mock import patch
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTextEdit
-from PyQt6.QtTest import QTest
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QKeyEvent
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.text_edit = QTextEdit(self)
-        self.setCentralWidget(self.text_edit)
+        self.setWindowTitle("QTableWidget with Resizable Columns")
+        self.setGeometry(100, 100, 800, 600)
 
-    def keyPressEvent(self, event: QKeyEvent):
-        print(f"Перехватили клавишу {event.modifiers()=} {event.key()=}")
-        if event.key() == Qt.Key.Key_F1:
-            print("F1")
-            self.text_edit.insertPlainText("F1 was pressed\n")
-        elif (
-            event.modifiers() == Qt.KeyboardModifier.ControlModifier
-            and event.key() == Qt.Key.Key_V
-        ):
-            print("elif")
-            self.text_edit.insertPlainText("Ctrl+V was pressed\n")
-        else:
-            print("else")
-            self.text_edit.insertPlainText("Другая клавиша\n")
-        print("?????")
+        # Create the QTableWidget
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(5)
+        self.tableWidget.setColumnCount(4)
 
+        # Populate the table with some data
+        for row in range(self.tableWidget.rowCount()):
+            for col in range(self.tableWidget.columnCount()):
+                item = QTableWidgetItem(f"Item {row},{col}")
+                self.tableWidget.setItem(row, col, item)
 
-class TestKeyPress(unittest.TestCase):
-    def setUp(self):
-        self.app = QApplication(sys.argv)
-        self.window = MainWindow()
-        self.window.show()
+        # Create the layout and add the QTableWidget
+        layout = QVBoxLayout()
+        layout.addWidget(self.tableWidget)
 
-    def test_f1_key_press(self):
-        # Имитируем нажатие клавиши F1
-        QTest.keyPress(self.window, Qt.Key.Key_F1)
+        # Create the central widget and set the layout
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
 
-        # Проверяем, что текст был добавлен
-        self.assertIn("F1 was pressed", self.window.text_edit.toPlainText())
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.resizeColumns()
 
-    def test_ctrl_v_key_press(self):
-        # Устанавливаем текст в буфер обмена
-        clipboard = QApplication.clipboard()
-        clipboard.setText("Тестовый текст")
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.resizeColumns()
 
-        # Имитируем нажатие Ctrl+V
-        # QTest.keyClick(self.window, Qt.Key.Key_V, Qt.KeyboardModifier.ControlModifier)
-        QTest.keyPress(
-            self.window.windowHandle(), "V", Qt.KeyboardModifier.ControlModifier
-        )
+    def resizeColumns(self):
+        table_width = self.tableWidget.width()
+        num_columns = self.tableWidget.columnCount()
+        column_width_percent = 100 / num_columns
+        for column in range(num_columns):
+            self.tableWidget.setColumnWidth(
+                column, int(table_width * (column_width_percent / 100))
+            )
 
 
 if __name__ == "__main__":
-    unittest.main()
-    #
-    # app = QApplication(sys.argv)
-    # window = MainWindow()
-    # window.show()
-    # sys.exit(app.exec())
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())

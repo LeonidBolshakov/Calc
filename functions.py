@@ -5,7 +5,7 @@ import re
 
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtCore import QUrl
-from PyQt6 import QtGui
+from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import QMimeData
 
 from constants import Const
@@ -49,6 +49,7 @@ def calculate_and_validate_formula(formula: str) -> str:
     """Вычисление результата формулы и обработка ошибок."""
 
     formula = add_math_prefix_to_function_calls(formula)  # Приводим формулу к math виду
+    print(formula)
 
     # noinspection PyBroadException
     try:
@@ -79,7 +80,7 @@ def create_formula_validation_pattern() -> str:
         pattern_s = "|".join(add_escape_to_special_symbols(Const.VALID_CHAR_SET))
         pattern_f = "|".join(Const.FORMULA_VALIDATION_LIST)
         create_formula_validation_pattern.result = (
-                "(" + pattern_s + "|" + pattern_f + ")"
+            "(" + pattern_s + "|" + pattern_f + ")"
         )
         return create_formula_validation_pattern.result
 
@@ -125,7 +126,8 @@ def filter_out_unsafe_symbols(source: QMimeData) -> QMimeData:
 def add_math_prefix_to_function_calls(formula):
     """Заменяет в формуле вызовы функций. К имени функции добавляется текст 'math.'"""
 
-    # Регулярное выражение для поиска всех имён разрешённых функций
+    # Регулярное выражение для поиска всех имён разрешённых функций.
+    # Шаблон выражения создаётся только при первом входе в программу.
     if hasattr(add_math_prefix_to_function_calls, "pattern"):
         pattern = add_math_prefix_to_function_calls.pattern
     else:

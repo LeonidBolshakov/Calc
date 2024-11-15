@@ -8,7 +8,7 @@ a = Analysis(
     datas=[
 	('_internal\\Calc.ui', '.'), 
 	('Help.mht', '.'),
-	('classes.py', '.'),
+	('customtextedit.py', '.'),
 	('constants.py', '.'),
 	('formulas.py', '.'),
 	('functions.py', '.'),
@@ -29,7 +29,8 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='main',
+    ico='Calculator.ico',
+    name='calculator',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -48,5 +49,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='main',
+    name='calculator',
 )
