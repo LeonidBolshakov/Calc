@@ -13,7 +13,6 @@ class CustomTextEdit(QTextEdit):
 
     def insertFromMimeData(self, source: QMimeData):
         """Подмена метода вставки данных из буфера обмена"""
-        print("*", source.hasText())
 
         # Из текста вставки убираем все лишние символы, и передаём управление дальше.
         if source.hasText():

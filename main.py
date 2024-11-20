@@ -41,7 +41,7 @@ class CalculatorApp(QMainWindow):
     f: F
 
     def __init__(self) -> None:
-        """Инициализация приложения и загрузка UI."""
+        """Инициализация приложения"""
         super().__init__()
 
         self.init_vars()  # Инициализация атрибутов класса
@@ -53,7 +53,7 @@ class CalculatorApp(QMainWindow):
 
         self.f = F(self)  # Методы работы с формулой
 
-        # Загрузка UI и переменных в форму объект класса
+        # Загрузка UI и переменных в объект класса
         exe_directory = (  # Директория, из которой был запущен файл
             Path(sys.argv[0]).parent
             if hasattr(sys, "frozen")  # exe файл, получен с помощью PyInstaller
@@ -68,7 +68,6 @@ class CalculatorApp(QMainWindow):
 
         self.txtFormula.setFocus()  # Установка фокуса на поле ввода формулы
         # установка текста подсказки в поля вводу формулы и вывода результата
-        self.txtFormula.setPlaceholderText(Const.PLACEHOLDER_FORMULA)
         self.txtResult.setPlaceholderText(Const.PLACEHOLDER_RESULT)
         self.f.set_decimal_places_input()  # Настройка поля ввода числа знаков округления
         self.customize_results_table()  # Настройка таблицы результатов
@@ -160,13 +159,13 @@ class CalculatorApp(QMainWindow):
         self.tblResults.setColumnWidth(2, column_width)
 
     def clear_formula_and_result(self):
-        """Очищаем текстовые поля ввода формулы и вывода результата"""
+        """Очищаем поля ввода формулы и вывода результата"""
 
         self.txtFormula.clear()  # Очищаем поле формулы
         self.txtResult.clear()  # Очищаем поле результата
 
     def output_result_to_text_field_and_history(
-            self, formula: str, result: str
+        self, formula: str, result: str
     ) -> None:
         """Вывод результата вычисления в текстовое поле и таблицу истории."""
 
@@ -226,7 +225,7 @@ class CalculatorApp(QMainWindow):
         self.tblResults.setCellWidget(row, 0, button)
 
     def add_and_lock_element_to_table(
-            self, row: int, column: int, text: str, align: str = Const.ALIGN_LEFT
+        self, row: int, column: int, text: str, align: str = Const.ALIGN_LEFT
     ):
         """Добавляем элемент в таблицу,
         делаем его недоступным для редактирования и выравниваем."""
@@ -289,7 +288,7 @@ class CalculatorApp(QMainWindow):
         # Запись данных в CSV файл
         try:
             with open(
-                    Const.HISTORY_FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
+                Const.HISTORY_FILE_NAME, mode="w", newline="", encoding="utf-8-sig"
             ) as file:
                 writer = csv.writer(file, delimiter=Const.EXCEL_LIST_SEPARATOR)
                 writer.writerow(Const.CSV_HEADERS)

@@ -49,7 +49,6 @@ def calculate_and_validate_formula(formula: str) -> str:
     """Вычисление результата формулы и обработка ошибок."""
 
     formula = add_math_prefix_to_function_calls(formula)  # Приводим формулу к math виду
-    print(formula)
 
     # noinspection PyBroadException
     try:
