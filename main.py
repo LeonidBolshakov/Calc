@@ -8,11 +8,11 @@
 
 import csv
 import sys
+from pathlib import Path
 
 from PyQt6 import QtWidgets, uic
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow
-from pathlib import Path
 
 from customtextedit import CustomTextEdit
 from constants import Const
