@@ -43,7 +43,7 @@ class Const:
         "pi",
         "e",
     }
-    HELP_FILE_NAME = "Help.mht"  # Имя файла с Help
+    HELP_FILE_NAME = "Help.htm"  # Имя файла с Help
     HELP_WINDOW_SIZE = (800, 600)  # Размеры окна помощи
     HISTORY_FILE_NAME = "results.csv"  # Имя файла с историей формул и результатов
     HISTORY_READ_ERROR = (

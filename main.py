@@ -29,6 +29,7 @@ class CalculatorApp(QMainWindow):
     btnCopy: QtWidgets.QPushButton
     btnExit: QtWidgets.QPushButton
     btnHelp: QtWidgets.QPushButton
+    btnPasteCopy: QtWidgets.QPushButton
     btnRound: QtWidgets.QPushButton
     btnRun: QtWidgets.QPushButton
     lblInf2: QtWidgets.QLabel
@@ -84,6 +85,7 @@ class CalculatorApp(QMainWindow):
         self.btnCopy.clicked.connect(self.copy_result_to_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
         self.btnHelp.clicked.connect(open_help)
+        self.btnPasteCopy.clicked.connect(self.paste_copy)
         self.btnRound.clicked.connect(self.f.round_result)
         self.btnRun.clicked.connect(self.f.formula_processing)
 
@@ -101,6 +103,10 @@ class CalculatorApp(QMainWindow):
         self.tblResults.verticalHeader().setVisible(
             False
         )  # Скрыть вертикальный заголовок
+
+        self.tblResults.setWordWrap(
+            False
+        )  # Запрет переноса информации на следующую строку
 
     def import_history_from_csv(self):
         """Историю из csv файла переписываем в таблицу результатов"""
@@ -305,6 +311,12 @@ class CalculatorApp(QMainWindow):
             (self.tblResults.item(row, 1).text(), self.tblResults.item(row, 2).text())
             for row in range(total_row_history)
         ]  # Передаём пары [Формула, Результат]
+
+    def paste_copy(self):
+        """Обработка нажатия кнопки 'Вставить, копировать'"""
+        self.txtFormula.paste()  # Копируем буфер обмена в поле формулы
+        self.f.formula_processing()  # рассчитываем формулу
+        self.copy_result_to_clipboard()  # записываем результат в буфер обмена
 
     def start(self) -> int:
         """Запуск приложения и отображение главного окна."""
