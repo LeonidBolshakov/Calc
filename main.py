@@ -169,6 +169,7 @@ class CalculatorApp(QMainWindow):
 
         self.txtFormula.clear()  # Очищаем поле формулы
         self.txtResult.clear()  # Очищаем поле результата
+        self.txtResult.setFont((bold_font(self.txtResult.font(), False)))
 
     def output_result_to_text_field_and_history(
         self, formula: str, result: str

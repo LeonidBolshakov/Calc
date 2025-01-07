@@ -22,10 +22,10 @@ def not_used():  # Фиктивная функция — позволяет не
     math.sqrt(0)
 
 
-def bold_font(font: QtGui.QFont) -> QtGui.QFont:
+def bold_font(font: QtGui.QFont, enabled=True) -> QtGui.QFont:
     """Возвращает шрифт с установленным жирным начертанием."""
 
-    font.setBold(True)
+    font.setBold(enabled)
     return font
 
 
