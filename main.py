@@ -131,7 +131,7 @@ class CalculatorApp(QMainWindow):
 
     def setup_bold(self):
         """Установка жирного начертания для шрифтов элементов управления."""
-        widgets = (self.btnRun, self.btnExit, self.txtFormula, self.txtResult)
+        widgets = (self.btnRun, self.btnExit, self.txtFormula)
         for widget in widgets:
             widget.setFont(bold_font(widget.font()))  # Установка жирного шрифта
 
@@ -183,6 +183,7 @@ class CalculatorApp(QMainWindow):
     def output_result_to_result_field(self, result: str) -> None:
         """Вывод результата вычисления в поле 'Результат'"""
 
+        self.txtResult.setFont(bold_font(self.txtResult.font()))
         self.txtResult.setPlainText(result)
 
     def insert_new_row_in_results(self, formula: str, result: str):
@@ -314,6 +315,7 @@ class CalculatorApp(QMainWindow):
 
     def paste_copy(self):
         """Обработка нажатия кнопки 'Вставить, копировать'"""
+        self.clear_formula_and_result()  # очищаем поле формулы
         self.txtFormula.paste()  # Копируем буфер обмена в поле формулы
         self.f.formula_processing()  # рассчитываем формулу
         self.copy_result_to_clipboard()  # записываем результат в буфер обмена
