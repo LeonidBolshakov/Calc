@@ -11,14 +11,15 @@ import sys
 from pathlib import Path
 
 from PyQt6 import QtWidgets, uic
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import QTableWidgetItem, QMainWindow
 
 from customtextedit import CustomTextEdit
 from constants import Const
 from formulas import F
 from message import ask_for_continuation, show_error_message
-from functions import bold_font, open_help
+from functions import bold_font
 
 
 class CalculatorApp(QMainWindow):
@@ -45,6 +46,7 @@ class CalculatorApp(QMainWindow):
         """Инициализация приложения"""
         super().__init__()
 
+        self.exe_directory = ''  # Директория, из которой была загружена программа
         self.init_vars()  # Инициализация атрибутов класса
         self.setup_interface()  # Настройка элементов интерфейса
         self.setup_connections()  # Установка соединений сигналов и слотов
@@ -55,13 +57,13 @@ class CalculatorApp(QMainWindow):
         self.f = F(self)  # Методы работы с формулой
 
         # Загрузка UI и переменных в объект класса
-        exe_directory = (  # Директория, из которой был запущен файл
+        self.exe_directory = (  # Директория, из которой был запущен файл
             Path(sys.argv[0]).parent
             if hasattr(sys, "frozen")  # exe файл, получен с помощью PyInstaller
             else Path(__file__).parent  # Если файл запущен как обычный Python-скрипт
         )
 
-        ui_config_abs_path = exe_directory / Const.UI_CONFIG_REL_PATH
+        ui_config_abs_path = self.exe_directory / Const.UI_CONFIG_REL_PATH
         uic.loadUi(ui_config_abs_path, self)
 
     def setup_interface(self) -> None:
@@ -84,7 +86,7 @@ class CalculatorApp(QMainWindow):
         self.btnClear.clicked.connect(self.clear_all_fields)
         self.btnCopy.clicked.connect(self.copy_result_to_clipboard)
         self.btnExit.clicked.connect(QtWidgets.QApplication.quit)
-        self.btnHelp.clicked.connect(open_help)
+        self.btnHelp.clicked.connect(self.open_help)
         self.btnPasteCopy.clicked.connect(self.paste_copy)
         self.btnRound.clicked.connect(self.f.round_result)
         self.btnRun.clicked.connect(self.f.formula_processing)
@@ -280,7 +282,7 @@ class CalculatorApp(QMainWindow):
 
         # При нажатии клавиши F1 вызов справки.
         if event.key() == Qt.Key.Key_F1:
-            open_help()  # открываем файл со справкой
+            self.open_help()  # открываем файл со справкой
 
     def closeEvent(self, event):
         """Переопределение метода выхода из программы"""
@@ -320,6 +322,12 @@ class CalculatorApp(QMainWindow):
         self.txtFormula.paste()  # Копируем буфер обмена в поле формулы
         self.f.formula_processing()  # рассчитываем формулу
         self.copy_result_to_clipboard()  # записываем результат в буфер обмена
+
+    def open_help(self):
+        """Вызов Help файла"""
+
+        help_file_path = self.exe_directory / Path(Const.HELP_FILE_NAME)
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(help_file_path)))
 
     def start(self) -> int:
         """Запуск приложения и отображение главного окна."""

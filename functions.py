@@ -3,9 +3,7 @@ import io
 import math
 import re
 
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtCore import QUrl
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtGui
 from PyQt6.QtCore import QMimeData
 
 from constants import Const
@@ -27,13 +25,6 @@ def bold_font(font: QtGui.QFont, enabled=True) -> QtGui.QFont:
 
     font.setBold(enabled)
     return font
-
-
-def open_help():
-    """Вызов Help файла"""
-
-    help_file_path = Const.HELP_FILE_NAME
-    QDesktopServices.openUrl(QUrl.fromLocalFile(help_file_path))
 
 
 def normalize_characters(formula: str) -> str:
